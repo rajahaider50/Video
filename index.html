@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#090d18"><meta name="description" content="Privacy-first browser video editing studio with optional Gemini AI chat and research.">
+<title>ClipForge — AI Video Studio</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+<div class="app-shell">
+<aside class="sidebar" id="sidebar">
+  <a class="brand" href="#"><span class="brand-mark"><i class="fa-solid fa-scissors"></i></span><span>ClipForge <small>AI VIDEO STUDIO</small></span></a>
+  <div class="workspace-label">WORKSPACE</div>
+  <button class="nav-item active" data-view="editor"><i class="fa-solid fa-film"></i> Video editor</button>
+  <button class="nav-item" data-view="assistant"><i class="fa-solid fa-wand-magic-sparkles"></i> AI assistant <span class="nav-pill">Gemini</span></button>
+  <button class="nav-item" data-view="projects"><i class="fa-regular fa-folder-open"></i> Local projects</button>
+  <div class="sidebar-bottom">
+    <div class="storage-card"><div class="flex justify-between gap-2"><span>Browser storage</span><span id="storageLabel">Checking…</span></div><div class="storage-track"><span id="storageBar"></span></div><small>Browser data can be cleared or evicted.</small></div>
+    <button class="nav-item" data-view="settings"><i class="fa-solid fa-sliders"></i> Settings & API</button>
+    <div class="privacy-note"><i class="fa-solid fa-shield-halved"></i> Your video stays on this device unless you explicitly use an external service.</div>
+  </div>
+</aside>
+<main class="main-area">
+<header class="topbar"><button id="menuBtn" class="icon-btn mobile-only" aria-label="Open navigation"><i class="fa-solid fa-bars"></i></button><div><div class="eyebrow">CREATIVE WORKSPACE</div><h1 id="pageTitle">Video editor</h1></div><div class="top-actions"><span class="status-dot"></span><span class="status-text">Local-first</span><button id="newProjectBtn" class="primary-btn"><i class="fa-solid fa-plus"></i> New project</button></div></header>
+<section id="editorView" class="view active">
+  <div class="editor-grid">
+    <div class="center-column">
+      <div class="panel media-panel">
+        <div class="panel-head"><div><h2>Preview canvas</h2><p>Import a local clip to get started</p></div><span id="mediaBadge" class="soft-badge">NO MEDIA</span></div>
+        <div class="preview-stage" id="dropZone">
+          <video id="preview" controls playsinline></video>
+          <div id="emptyPreview" class="empty-preview"><div class="empty-icon"><i class="fa-solid fa-clapperboard"></i></div><h3>Your next cut starts here</h3><p>Drop a video here, or browse files from your device.</p><label for="fileInput" class="primary-btn"><i class="fa-solid fa-arrow-up-from-bracket"></i> Import video</label><span class="hint">MP4 · WebM · MOV* · subject to browser codec support</span></div>
+        </div>
+        <div class="preview-footer"><span id="videoInfo">No clip loaded</span><div class="ratio-group"><button class="ratio-btn selected" data-ratio="9:16">9:16</button><button class="ratio-btn" data-ratio="16:9">16:9</button><button class="ratio-btn" data-ratio="1:1">1:1</button></div></div>
+      </div>
+      <div class="panel timeline-panel">
+        <div class="panel-head"><div><h2>Clip timeline</h2><p>Set precise in and out points</p></div><button id="clearCutBtn" class="text-btn">Reset cut</button></div>
+        <div class="timeline-ruler"><span>00:00</span><span id="durationLabel">00:00</span></div>
+        <div class="range-wrap"><label for="startRange">Start</label><input id="startRange" type="range" min="0" max="100" value="0" step="0.1"><output id="startOut">00:00.0</output></div>
+        <div class="range-wrap"><label for="endRange">End</label><input id="endRange" type="range" min="0" max="100" value="100" step="0.1"><output id="endOut">00:00.0</output></div>
+        <div class="timeline-actions"><button id="playCutBtn" class="secondary-btn"><i class="fa-solid fa-play"></i> Preview cut</button><span id="cutSummary">Import a video to enable trimming.</span></div>
+      </div>
+    </div>
+    <div class="right-column">
+      <div class="panel controls-panel"><div class="panel-head"><div><h2>Export settings</h2><p>Render on your device</p></div><i class="fa-solid fa-sliders panel-icon"></i></div>
+        <label class="field-label" for="exportFormat">Output format</label><select id="exportFormat" class="field"><option value="mp4">MP4 (H.264, if encoder loads)</option><option value="webm">WebM (browser/FFmpeg support dependent)</option></select>
+        <label class="field-label" for="exportRatio">Canvas ratio</label><select id="exportRatio" class="field"><option value="9:16">Vertical · 9:16</option><option value="16:9">Landscape · 16:9</option><option value="1:1">Square · 1:1</option><option value="original">Original dimensions</option></select>
+        <label class="field-label" for="qualitySelect">Encoding quality</label><select id="qualitySelect" class="field"><option value="23">High quality</option><option value="28">Balanced / smaller file</option><option value="18">Very high quality (larger file)</option></select>
+        <div class="notice"><i class="fa-solid fa-circle-info"></i><span>FFmpeg WebAssembly can use substantial memory. Large files may fail on mobile devices.</span></div>
+        <button id="exportBtn" class="primary-btn full-btn" disabled><i class="fa-solid fa-file-export"></i> Export selected cut</button>
+        <div class="progress-block" id="progressBlock" hidden><div class="flex justify-between"><span id="progressText">Preparing encoder…</span><span id="progressPercent">0%</span></div><div class="progress-track"><span id="progressBar"></span></div><button id="cancelExportBtn" class="text-btn">Cancel export</button></div>
+        <div id="exportResult" class="export-result" hidden></div>
+      </div>
+      <div class="panel quick-panel"><div class="panel-head"><div><h2>AI clip ideas</h2><p>Optional Gemini-assisted planning</p></div><i class="fa-solid fa-sparkles panel-icon violet"></i></div><p class="small-copy">Describe the goal of your video and Gemini can suggest a clip strategy. This does not analyze the actual media unless you provide a transcript or details.</p><textarea id="clipPrompt" class="field textarea" rows="3" placeholder="e.g. Find a punchy 30-second hook for a tutorial…"></textarea><button id="askClipBtn" class="secondary-btn full-btn"><i class="fa-solid fa-wand-magic-sparkles"></i> Suggest a clip plan</button><div id="clipPlan" class="answer-box" hidden></div></div>
+    </div>
+  </div>
+</section>
+<section id="assistantView" class="view">
+ <div class="assistant-layout"><div class="panel chat-panel"><div class="panel-head"><div><h2>Research & chat</h2><p>Gemini API · automatically routed by task</p></div><span class="soft-badge"><i class="fa-solid fa-bolt"></i> Auto model</span></div><div id="chatMessages" class="chat-messages"><div class="welcome-message"><div class="empty-icon"><i class="fa-solid fa-comments"></i></div><h3>What are we working on?</h3><p>Ask for research, editing workflows, scripts, summaries, or technical help. Model routing chooses an available model based on the task.</p><div class="suggestion-row"><button class="suggestion" data-prompt="Research current best practices for short-form video hooks. Explain limitations and cite useful source URLs if available.">Research video hooks</button><button class="suggestion" data-prompt="Create a concise editing plan for a 45-second vertical video with subtitles and a strong opening.">Create an edit plan</button></div></div></div><form id="chatForm" class="chat-compose"><textarea id="chatInput" rows="2" placeholder="Message Gemini… (Shift+Enter for a new line)" required></textarea><button class="send-btn" aria-label="Send message"><i class="fa-solid fa-arrow-up"></i></button></form><div class="chat-disclaimer">Gemini responses are generated externally by Google and may be inaccurate. API usage may be billable under your Google AI plan.</div></div><aside class="panel assistant-side"><h3><i class="fa-solid fa-route"></i> Automatic routing</h3><div class="route-item"><span class="route-icon"><i class="fa-solid fa-magnifying-glass"></i></span><div><b>Research</b><p>Prefers models whose names indicate stronger reasoning or Pro capability, if listed.</p></div></div><div class="route-item"><span class="route-icon"><i class="fa-regular fa-message"></i></span><div><b>General chat</b><p>Prefers a Flash-class model for responsive everyday help.</p></div></div><div class="route-item"><span class="route-icon"><i class="fa-solid fa-circle-check"></i></span><div><b>Live model list</b><p>Fetched from the API key you configure. Only models returned and supported by the API are offered.</p></div></div><button class="secondary-btn full-btn" id="refreshModelsBtn">Refresh available models</button><div id="modelStatus" class="small-copy">API key not configured.</div></aside></div>
+</section>
+<section id="projectsView" class="view"><div class="section-intro"><div><h2>Local projects</h2><p>Project metadata is stored in this browser on this device.</p></div><button id="saveProjectBtn" class="primary-btn"><i class="fa-regular fa-floppy-disk"></i> Save current project</button></div><div id="projectsList" class="projects-grid"><div class="empty-card">No saved projects yet. Import a video and save your project.</div></div><div class="notice wide-notice"><i class="fa-solid fa-triangle-exclamation"></i><span>Saved project metadata does not guarantee the source video itself is retained. Keep your original files backed up.</span></div></section>
+<section id="settingsView" class="view"><div class="settings-grid"><div class="panel settings-panel"><div class="panel-head"><div><h2>Gemini API connection</h2><p>Connect the Google Gemini API for chat and planning</p></div><i class="fa-solid fa-key panel-icon"></i></div><div class="notice"><i class="fa-solid fa-shield-halved"></i><span>This is a static client app. Any API key entered here is used in your browser and can be inspected by you or browser extensions. Do not put a private/team key in a public deployment.</span></div><label class="field-label" for="apiKeyInput">Gemini API key</label><div class="key-row"><input id="apiKeyInput" type="password" class="field" autocomplete="off" placeholder="Paste your Google AI Studio API key"><button id="toggleKeyBtn" class="secondary-btn" type="button" aria-label="Show or hide API key"><i class="fa-regular fa-eye"></i></button></div><div class="settings-actions"><button id="saveKeyBtn" class="primary-btn">Save on this device</button><button id="forgetKeyBtn" class="secondary-btn">Forget key</button><button id="testKeyBtn" class="secondary-btn">Test & list models</button></div><div id="apiStatus" class="status-message" role="status">Not connected.</div><div class="divider"></div><h3>Model routing preferences</h3><p class="small-copy">The app discovers available models from the Gemini API. It then chooses a suitable listed model automatically. Availability and names can change by account, region, and API version.</p><div id="availableModels" class="model-list"><span class="muted">No model list loaded.</span></div></div><div class="panel settings-panel"><div class="panel-head"><div><h2>Local data & privacy</h2><p>Manage this browser's saved data</p></div><i class="fa-solid fa-database panel-icon"></i></div><div class="data-row"><div><b>IndexedDB projects</b><p>Project settings and cut metadata</p></div><span id="projectCount" class="soft-badge">0</span></div><div class="data-row"><div><b>Storage estimate</b><p id="storageDetail">Checking browser quota…</p></div><button id="refreshStorageBtn" class="text-btn">Refresh</button></div><div class="settings-actions"><button id="exportDataBtn" class="secondary-btn">Export project metadata</button><button id="clearProjectsBtn" class="danger-btn">Delete saved projects</button></div><div class="notice"><i class="fa-solid fa-circle-info"></i><span>Core video editing runs locally. Google Gemini chat/planning sends the text you submit to Google's API. No video is uploaded by this app unless a future feature explicitly says so.</span></div><h3>Browser capability</h3><div id="capabilityList" class="capability-list"></div></div></div></section>
+<footer class="footer"><span>ClipForge Studio · Browser-first editing</span><span>Built for honest, local-first workflows</span></footer>
+</main>
+</div>
+<input id="fileInput" type="file" accept="video/*,.mp4,.webm,.mov,.m4v,.mkv" hidden>
+<div id="toast" class="toast" role="status"></div>
+<script type="module" src="./app.js"></script>
+</body></html>
